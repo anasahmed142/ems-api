@@ -6,7 +6,7 @@ import { connectToDatabase } from "../lib/db.js";
 const router = express.Router();
 router.post("", async (request, res) => {
     try {
-        const payload = await req.body;
+        const payload = await request.body;
         const { userId, location } = payload;
 
         if (!userId || !location) {
