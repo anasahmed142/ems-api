@@ -14,13 +14,17 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 // Configure CORS to allow the frontend origin and enable credentials
 const FRONTEND_URL = 'https://employe-managment-system-peach.vercel.app';
+const testing_URL = 'http://localhost:3000/';
 const corsOptions = {
 	origin: function (origin, callback) {
 		// allow requests with no origin like mobile apps or curl
 		if (!origin) return callback(null, true);
 		if (origin === FRONTEND_URL) {
 			callback(null, true);
-		} else {
+		} if(origin === testing_URL) {
+			callback(null, true);
+		}
+		else {
 			callback(new Error('Not allowed by CORS'));
 		}
 	},
