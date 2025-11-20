@@ -1,6 +1,5 @@
 import express from "express";
 import Location from "../models/Location.js";
-import User from "../models/User.js";
 import { connectToDatabase } from "../lib/db.js";
 
 const router = express.Router();
@@ -9,13 +8,13 @@ router.get("/", async (req, res) => {
   try {
     await connectToDatabase();
 
-    // Pagination
-    const page = parseInt(req.query.page || "1");
-    const limit = parseInt(req.query.limit || "10");
+    // Pagination (sanitize inputs)
+    const page = Math.max(1, parseInt(req.query.page || "1", 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit || "10", 10) || 10));
     const skip = (page - 1) * limit;
 
     const totalRecords = await Location.countDocuments();
-    const totalPages = Math.ceil(totalRecords / limit);
+    const totalPages = Math.ceil(totalRecords / limit) || 1;
 
     const locations = await Location.find()
       .sort({ createdAt: -1 })
@@ -23,23 +22,23 @@ router.get("/", async (req, res) => {
       .limit(limit)
       .populate("user", "_id name");
 
-    // Format response
-    const formatted = locations.map((loc) => ({
-      uid: loc.user?._id?.toString() || "",
-      name: loc.user?.name || "",
-      timestamp: loc.createdAt.toISOString(),
-      latitude: loc.location?.latitude,
-      longitude: loc.location?.longitude,
-      accuracy: loc.location?.accuracy,
-      type: loc.LocationTypes,
-      photo: loc.location?.photo || "",
-    }));
-
-    return res.status(200).json({
-      locations: formatted,
-      totalPages,
-      currentPage: page,
+    // Format response with guards
+    const formatted = locations.map((loc) => {
+      const createdAt = loc.createdAt ? new Date(loc.createdAt) : new Date();
+      const locObj = loc.location || {};
+      return {
+        uid: loc.user?._id?.toString() || "",
+        name: loc.user?.name || "",
+        timestamp: createdAt.toISOString(),
+        latitude: locObj.latitude ?? null,
+        longitude: locObj.longitude ?? null,
+        accuracy: locObj.accuracy ?? null,
+        type: (loc.LocationTypes || "").toString(),
+        photo: locObj.photo || "",
+      };
     });
+
+    return res.status(200).json({ success: true, data: { locations: formatted, totalPages, currentPage: page } });
 
   } catch (error) {
     console.error("Location history error:", error);

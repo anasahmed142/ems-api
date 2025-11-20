@@ -90,16 +90,18 @@ router.post("/", async (req, res) => {
       const attendance = {};
 
       for (const loc of locations) {
-        const date = loc.createdAt.toDateString();
+        const created = loc.createdAt || new Date();
+        const date = new Date(created).toDateString();
 
         if (!attendance[date]) {
           attendance[date] = { login: null, logout: null };
         }
 
-        if (loc.LocationTypes === "login") {
-          attendance[date].login = loc.createdAt;
-        } else if (loc.LocationTypes === "logout") {
-          attendance[date].logout = loc.createdAt;
+        const type = (loc.LocationTypes || "").toString().toLowerCase();
+        if (type === "login") {
+          attendance[date].login = created;
+        } else if (type === "logout") {
+          attendance[date].logout = created;
         }
       }
 
@@ -132,7 +134,7 @@ router.post("/", async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
-      error: error.message,
+      error: (error && error.message) || String(error),
     });
   }
 });
