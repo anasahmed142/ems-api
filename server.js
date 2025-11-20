@@ -13,7 +13,7 @@ console.log("Loaded MONGO_URI:", process.env.MONGO_URI);
 const app = express();
 const PORT = process.env.PORT || 5000;
 // Configure CORS to allow the frontend origin and enable credentials
-const FRONTEND_URL = 'http://localhost:3000';
+const FRONTEND_URL = 'https://employe-managment-system-peach.vercel.app';
 const corsOptions = {
 	origin: function (origin, callback) {
 		// allow requests with no origin like mobile apps or curl
