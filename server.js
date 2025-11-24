@@ -13,26 +13,54 @@ console.log("Loaded MONGO_URI:", process.env.MONGO_URI);
 const app = express();
 const PORT = process.env.PORT || 5000;
 // Configure CORS to allow the frontend origin and enable credentials
-const FRONTEND_URL = 'https://employe-managment-system-peach.vercel.app';
-const testing_URL = 'http://localhost:3000';
-const corsOptions = {
-	origin: function (origin, callback) {
-		// allow requests with no origin like mobile apps or curl
-		if (!origin) return callback(null, true);
-		if (origin === FRONTEND_URL) {
-			callback(null, true);
-		} if (origin === testing_URL) {
-			callback(null, true);
-		}
-		else {
-			callback(new Error('Not allowed by CORS'));
-		}
-	},
-	credentials: true,
-	methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-	allowedHeaders: ['Content-Type', 'Authorization'],
-}
+// const FRONTEND_URL = 'https://employe-managment-system-peach.vercel.app';
+// const testing_URL = 'http://localhost:3000';
+const allowedOrigins = [
+  "https://employe-managment-system-peach.vercel.app",
+  /\.vercel\.app$/,
+  "http://localhost:3000"
+];
 
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+
+    if (
+      allowedOrigins.some(o =>
+        typeof o === "string" ? o === origin : o.test(origin)
+      )
+    ) {
+      callback(null, true);
+    } else {
+      console.log("❌ BLOCKED ORIGIN:", origin);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+// const corsOptions = {
+// 	origin: function (origin, callback) {
+// 		// allow requests with no origin like mobile apps or curl
+// 		if (!origin) return callback(null, true);
+// 		if (origin === FRONTEND_URL) {
+// 			callback(null, true);
+// 		} if (origin === testing_URL) {
+// 			callback(null, true);
+// 		}
+// 		else {
+// 			callback(new Error('Not allowed by CORS'));
+// 		}
+// 	},
+// 	credentials: true,
+// 	methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+// 	allowedHeaders: ['Content-Type', 'Authorization'],
+// }
+app.use((req, res, next) => {
+  console.log("Incoming request origin:", req.headers.origin);
+  next();
+});
 app.use(cors(corsOptions));
 // Increase body size limits to handle larger JSON / form payloads
 app.use(express.json({ limit: "100mb" }));
