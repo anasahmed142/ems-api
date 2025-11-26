@@ -23,18 +23,19 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
+    return callback(null, true);
+    // if (!origin) return callback(null, true);
 
-    if (
-      allowedOrigins.some(o =>
-        typeof o === "string" ? o === origin : o.test(origin)
-      )
-    ) {
-      callback(null, true);
-    } else {
-      console.log("❌ BLOCKED ORIGIN:", origin);
-      callback(new Error("Not allowed by CORS"));
-    }
+    // if (
+    //   allowedOrigins.some(o =>
+    //     typeof o === "string" ? o === origin : o.test(origin)
+    //   )
+    // ) {
+    //   callback(null, true);
+    // } else {
+    //   console.log("❌ BLOCKED ORIGIN:", origin);
+    //   callback(new Error("Not allowed by CORS"));
+    // }
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
